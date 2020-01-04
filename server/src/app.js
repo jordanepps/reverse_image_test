@@ -7,6 +7,7 @@ const { NODE_ENV } = require('./config');
 // const multer = require('multer');
 // const upload = multer({ dest: './uploads/' });
 const formidable = require('formidable');
+const fs = require('fs');
 
 const app = express();
 
@@ -31,17 +32,31 @@ app.post('/upload', (req, res, next) => {
   //   console.log(req);
   //   res.send('Good');
 
-  new formidable.IncomingForm().parse(req, (err, fields, files) => {
-    if (err) {
-      console.error('Error', err);
-      throw err;
-    }
-    console.log('Fields', fields);
-    console.log('Files', files);
-    for (const file of Object.entries(files)) {
-      console.log(file);
-    }
+  // new formidable.IncomingForm().parse(req, (err, fields, files) => {
+  //   if (err) {
+  //     console.error('Error', err);
+  //     throw err;
+  //   }
+  //   console.log('Fields', fields);
+  //   console.log('Files', files);
+  //   for (const file of Object.entries(files)) {
+  //     console.log(file);
+  //   }
+  // });
+
+  let form = new formidable.IncomingForm();
+
+  form.parse(req);
+
+  form.on('fileBegin', function(name, file) {
+    file.path = __dirname + '/uploads/' + file.name;
   });
+
+  form.on('file', function(name, file) {
+    console.log('Uploaded ' + file.name);
+  });
+
+  res.sendFile(__dirname + '/index.html');
 });
 
 app.use(function errorHandler(error, req, res, next) {
