@@ -44,9 +44,9 @@ app.post('/upload', (req, res, next) => {
   //   }
   // });
 
-  let form = new formidable.IncomingForm();
+  let form = new formidable.IncomingForm().parse(req);
 
-  form.parse(req);
+  // form.parse(req);
 
   form.on('fileBegin', function(name, file) {
     file.path = __dirname + '/uploads/' + file.name;
