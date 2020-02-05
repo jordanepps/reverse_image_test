@@ -4,19 +4,30 @@ const morgan = require('morgan');
 const cors = require('cors');
 const helmet = require('helmet');
 const { NODE_ENV } = require('./config');
-// const multer = require('multer');
+const multer = require('multer');
+const path = require('path');
 
-// const formidable = require('formidable');
-// const fs = require('fs');
+//Set Storage Engine
+const storage = multer.diskStorage({
+  destination: './public/uploads/',
+  filename: function(req, file, cb) {
+    cb(
+      null,
+      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
+    );
+  }
+});
+
+//Init Upload
+const upload = multer({
+  storage
+}).single('food');
 
 const app = express();
 
-const morganOption = NODE_ENV === 'production' ? 'tiny' : 'common';
+app.use(express.static('./public'));
 
-// const upload = multer({
-//   dest: 'uploads/',
-//   filename: (req, file, next) => console.log(file)
-// });
+const morganOption = NODE_ENV === 'production' ? 'tiny' : 'common';
 
 app.use(morgan(morganOption));
 app.use(cors());
@@ -34,19 +45,23 @@ app.get('/', (req, res) => {
 //   form.on('file', function(name, file) {
 //     console.log('Uploaded ' + file.name);
 //   });
-
 // });
 
 /**********
    File Upload With Multer 
    **********/
 
-// app.post('/upload', upload.single('foodImage'), (req, res, next) => {
-//   res.send('ok');
-// });
-
-/* GOOGLE CLOUD UPLOAD */
-app.post('/upload', (req, res, next) => {});
+app.post('/upload', (req, res, next) => {
+  upload(req, res, err => {
+    if (err) {
+      console.log(err);
+      res.sendStatus(500);
+    } else {
+      console.log(req.file);
+      res.send(test);
+    }
+  });
+});
 
 app.use(function errorHandler(error, req, res, next) {
   let response =
